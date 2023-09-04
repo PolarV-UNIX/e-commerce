@@ -37,7 +37,6 @@ static/
 
 # Dependency files
 pip-log.txt
-requirements.txt
 npm-debug.log
 
 # Temporary files
