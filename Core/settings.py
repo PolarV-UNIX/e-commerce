@@ -19,11 +19,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
+# gitignore-start
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-ipc%gmdbmkh63#*3w62oid1rh6_h!!nh%wrj)f4xb+8pv_oq7z'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+# gitignore-end
 
 ALLOWED_HOSTS = []
 
@@ -78,12 +80,15 @@ WSGI_APPLICATION = 'Core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
+        # gitignore-start
         'NAME': '', #Define name of DB
         'USER': '', #Define name of root user DB
         'PASSWORD': '',
+        # gitignore-end
         'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
