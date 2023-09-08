@@ -41,6 +41,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         user.generateVerificationCode()
         return user
+  
     
 """ USER DEVICE'S IP SERILIZER """
 class UserDeviceIPSerializer(serializers.ModelSerializer):
@@ -48,8 +49,63 @@ class UserDeviceIPSerializer(serializers.ModelSerializer):
         model = UserDevice
         fields = ['ip_address']
     
-    
 
+""" USER CHANGE PHONE NUMBER SERIALIZER"""
 class UserChanePhonenumberSerializer(serializers.ModelSerializer):
-    pass
+    class Meta:
+        model = User
+        fields = ['phone']
+        
+    def update(self, instance, validated_data):
+        try:
+            instance.phone = validated_data.get('phone', instance.phone)
+        except:
+            raise serializers.ValidationError(
+                "there is a problem with add phone number"
+            )
+        instance.save()
+        return instance
 
+
+""" USER CHANGE AVATAR SERAIZIER """
+class UserChangeAvatarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['avatar']
+    
+    def validate_avatar(self, value):
+        regex_avatar = "([^\\s]+(\\.(?i)(jpe?g|png|gif|bmp))$)"
+        p = re.compile(regex_avatar)
+        if not re.search(p, value):
+            raise serializers.ValidationError("invalid image path")
+        return value
+        
+        
+""" USER CHANGE NAME SERAILZIER """
+class UserChangeNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name']
+        
+    def update(self, instance, validated_data):
+        if {'first_name', 'last_name'}.issubset(validated_data):
+            instance.first_name = validated_data['first_name']
+            instance.last_name = validated_data['last_name']
+            instance.save()
+            return instance
+        else:
+            try:
+                first_name = validated_data['first_name']
+            except:
+                try:
+                    last_name = validated_data['last_name']
+                except:
+                    raise serializers.validated_data(
+                        "at least must exist one of first name or last name"
+                    )
+                instance.last_name = last_name
+                instance.save()
+                return instance
+            instance.first_name = first_name
+            instance.save()
+            return instance

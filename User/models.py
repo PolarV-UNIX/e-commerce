@@ -71,7 +71,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     modifiy_date = models.DateTimeField(auto_now=True)
     
     # USER'S AVATAR
-    avatar = models.ImageField(blank=True, null=True)
+    avatar = models.ImageField(blank=True, null=True, upload_to="/media/profile_photos/")
     
     # USER'S BIRTHDAY
     birth_day = models.DateField(null=True, blank=True) 
@@ -86,6 +86,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     # USER'S SITUATION
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    
+    # USER'S FAVORITE
+    # TODO product relation
+    favorits = models.ManyToManyField('Product', related_name='favorited_by', blank=True, null=True)
     
     # USER'S MANAGER
     objects = UserManager()

@@ -12,7 +12,6 @@ def genrateJWTToken(user_id, user_phone, code):
     payload = {
         'user_id': user_id,
         'phone': user_phone,
-        'code': code,
         'exp': timezone.now() + datetime.timedelta(days=60)
     }
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
@@ -34,4 +33,10 @@ def checkToken(token, user):
             return decoded_data
     except:
         return False
+    
+def changeJWTTokenPayloadPhoneNumber(payload, phone):
+    # Change the phone number in token
+    payload['phone'] = phone
+    token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+    return token
             
