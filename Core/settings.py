@@ -19,6 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+
 # gitignore-start
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-ipc%gmdbmkh63#*3w62oid1rh6_h!!nh%wrj)f4xb+8pv_oq7z'
@@ -48,7 +49,25 @@ INSTALLED_APPS = [
     #Apps
     'Product',
     'Payment',
+    'User',
 ]
+
+# DRF JWT TOKEN CONFIG
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # OTHER AUTH CLASS IF NEEDED
+    )
+}
+# ACCESS TOKEN EXPIRE
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=60),  # Set the access token lifetime to 60 days
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=60),  # Optional: Set the refresh token lifetime to 60 days
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=120),  # Optional: Set the sliding token lifetime to 120 days
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -78,11 +97,20 @@ TEMPLATES = [
     },
 ]
 
+# CORS SETTINGS
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+]
+
 WSGI_APPLICATION = 'Core.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+
 
 DATABASES = {
     'default': {
@@ -91,6 +119,9 @@ DATABASES = {
         'NAME': 'shayan', #Define name of DB
         'USER': 'root', #Define name of root user DB
         'PASSWORD': '',
+        'NAME': 'ecommerce', #Define name of DB
+        'USER': 'root', #Define name of root user DB
+        'PASSWORD': 'H3981331030h',
         # gitignore-end
         'HOST': 'localhost',
         'PORT': '3306',
@@ -131,6 +162,17 @@ USE_I18N = True
 
 USE_TZ = True
 
+# AUTH CUSTOM USER MODEL
+AUTH_USER_MODEL = 'User.User'
+
+# GET  USER URL
+GET_USER_URL = ''
+
+# DEFINE AUTH BACKEND
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'Core.auth_backend.MyBackend',
+)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
