@@ -116,9 +116,6 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         # gitignore-start
-        'NAME': 'shayan', #Define name of DB
-        'USER': 'root', #Define name of root user DB
-        'PASSWORD': '',
         'NAME': 'ecommerce', #Define name of DB
         'USER': 'root', #Define name of root user DB
         'PASSWORD': 'H3981331030h',
@@ -182,7 +179,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
-customColorPalette = [
+CUSTOM_COLOR_PALETTE = [
         {
             'color': 'hsl(4, 90%, 58%)',
             'label': 'Red'
@@ -246,12 +243,12 @@ CKEDITOR_5_CONFIGS = {
             'contentToolbar': [ 'tableColumn', 'tableRow', 'mergeTableCells',
             'tableProperties', 'tableCellProperties' ],
             'tableProperties': {
-                'borderColors': customColorPalette,
-                'backgroundColors': customColorPalette
+                'borderColors': CUSTOM_COLOR_PALETTE,
+                'backgroundColors': CUSTOM_COLOR_PALETTE
             },
             'tableCellProperties': {
-                'borderColors': customColorPalette,
-                'backgroundColors': customColorPalette
+                'borderColors': CUSTOM_COLOR_PALETTE,
+                'backgroundColors': CUSTOM_COLOR_PALETTE
             }
         },
         'heading' : {
