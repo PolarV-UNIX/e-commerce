@@ -32,9 +32,9 @@ class Payment(models.Model):
     )
 
 
-    user = models.ForeignKey('users.user', verbose_name= 'user', related_name='%(class)s', on_delete=models.SET_NULL)
-    gateway = models.ForeignKey(Gateway, verbose_name='gateway', related_name='%(class)s', on_delete=models.SET_NULL)
-    price = models.PositiveIntegerField('price', default=0)
+    user_id = models.ForeignKey('User.User', verbose_name= 'user', related_name='%(class)s', on_delete=models.CASCADE)
+    gateway_id = models.ForeignKey('Gateway', verbose_name='gateway', related_name='%(class)s', on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     status = models.PositiveSmallIntegerField('status', choices= STATUS_CHOICES, default= STATUS_VOID, db_index=True)
     device_uuid = models.CharField('device uuid', max_length=40, blank=True)
     token = models.CharField(max_length=200)

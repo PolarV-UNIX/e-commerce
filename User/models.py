@@ -12,28 +12,23 @@ from datetime import timedelta
 
 """ USER'S OBJECT MANAGER """
 class UserManager(BaseUserManager):
-    # CREATE AND SAVE A USER WITH THAT FIELDS
-    def create_user(self, phone_number=None, first_name=None, last_name=None):
+    def create_user(self, phone=None, first_name=None, last_name=None, password=None, **extra_fields):
+        if not phone:
+            raise ValueError('Phone number is required')
         user = self.model(
-            phone_number = phone_number,
-            first_name = first_name,
-            last_name = last_name
-        )
+            phone=phone, 
+            first_name=first_name,
+            last_name=last_name, 
+            **extra_fields)
+        user.set_password(password)
         user.save(using=self._db)
         return user
-    
-    # CREATE AND SAVE A SUPERUSER FOR ADMIN OF APP 
-    def create_superuser(self, phone_number=None, first_number=None, last_number=None):
-        user = self.create_user(
-            phone_number = phone_number,
-            first_name = first_number,
-            last_name = last_number
-        )
-        user.is_staff = True
-        user.is_superuser = True
-        user.save(using=self._db)
-        return user
-    
+
+    def create_superuser(self, phone=None, first_name=None, last_name=None, password=None, **extra_fields):
+        # extra_fields.setdefault('type', 'admin')
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_staff', True)
+        return self.create_user(phone, first_name, last_name, password, **extra_fields)
 
 """ USER MODEL """
 class User(AbstractBaseUser, PermissionsMixin):
@@ -43,7 +38,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         (2, 'Customer')
     )
     type_user = models.PositiveSmallIntegerField(choices=USER_TYPE, default=2)
-    
+    device_user = models.ForeignKey('User.UserDevice', on_delete=models.SET_NULL, null=True, blank=True)
     # VERIFICATION CODE
     """ store the codes here to authentication code """
     verification_code = models.CharField(max_length=6, blank=True, null=True)
@@ -53,8 +48,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     expiration_date = models.DateTimeField(null=True, blank=True)
     
     # USER'S FULL-NAME
-    first_name = models.CharField(max_length=50, blank=True)
-    last_name = models.CharField(max_length=50, blank=True)
+    first_name = models.CharField(max_length=50, null=True,blank=True)
+    last_name = models.CharField(max_length=50, blank=True, null=True)
     
     # USER'S PHONE-NUMBER 
     phone_regex = RegexValidator(
@@ -71,7 +66,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     modifiy_date = models.DateTimeField(auto_now=True)
     
     # USER'S AVATAR
-    avatar = models.ImageField(blank=True, null=True, upload_to="/media/profile_photos/")
+    avatar = models.ImageField(blank=True, null=True, upload_to="media/profile_photos/")
     
     # USER'S BIRTHDAY
     birth_day = models.DateField(null=True, blank=True) 
@@ -88,8 +83,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     
     # USER'S FAVORITE
-    # TODO product relation
-    favorits = models.ManyToManyField('Product', related_name='favorited_by', blank=True, null=True)
+    favorits = models.ManyToManyField('Product.Product', related_name='favorited_by', blank=True)
     
     # USER'S MANAGER
     objects = UserManager()
@@ -134,7 +128,6 @@ class UserDevice(models.Model):
         (3, "android")
     )
     device = models.PositiveSmallIntegerField(
-        max_length=15, 
         choices=DEVICE_PLATFORM, 
         default=1,
         null=True,
@@ -145,10 +138,12 @@ class UserDevice(models.Model):
     ip_address = models.GenericIPAddressField(protocol="both", unpack_ipv4=True)
     
     # USER'S FIELD
-    user = models.ForeignKey("User.User", on_delete=models.SET_NULL)
+    user_id = models.ForeignKey("User.User", on_delete=models.CASCADE)
     
     # UUID OF USER'S DEVICE
     device_uuid = models.UUIDField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True )
+    modified_at = models.DateTimeField(auto_now=True)
     
     # METADATA
     class Meta:

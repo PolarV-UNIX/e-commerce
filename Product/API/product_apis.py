@@ -14,7 +14,8 @@ from Product.serializers.product_serializers import (
     ProductViewSerializer,
     DetailSerializer,
     FavoritsSerailizer,
-    ProductForUserSerializer
+    ProductForUserSerializer,
+    AddSimpleProductSerializer
 )
 from User.jwt import checkToken, genrateJWTToken
 from User.models import User
@@ -22,6 +23,47 @@ from User.models import User
 
 
 class ProductViewSet(ViewSet):
+    """ DEFINE DELETE METHOD """
+    def delete(self, request):
+        pass
+    
+    """ ADD PRODUCT SIMPLE"""
+    @action(methods=['post'], detail=False,url_path=r'addsimpleproduct', url_name='addsimpleproduct')
+    def addSimpleProduct(self, request):
+        try:
+            token = request.META.get('HTTP_AUTHORIZATION')
+        except:
+            return response(
+                data=None,
+                status=400,
+                message="there is no token add in header request"
+            )
+        check_token = checkToken(token)
+        if check_token is False:
+            return response(
+                data=None,
+                status=500,
+                message="there is a problem token"
+            )
+        user = User.objects.filter(id=check_token['user_id']).first()
+        if not user:
+            return response(
+                data=None,
+                status=404,
+                message="user not found"
+            )
+        data = request.data
+        serializer = AddSimpleProductSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+    
+        return response(
+            data=serializer.data,
+            status=201,
+            message="product successfully created"
+        )
+        
+
     """ PRODUCT VIEW """
     @action(methods=['get'], detail=False, url_path=r'productview', url_name='productview')
     def productView(self, request):
@@ -40,14 +82,14 @@ class ProductViewSet(ViewSet):
                 status=500,
                 message="there is a problem token"
             )
-        user = User.objects.filter(id=check_token['id']).first()
+        user = User.objects.filter(id=check_token['user_id']).first()
         if not user:
             return response(
                 data=None,
                 status=404,
                 message="user not found"
             )
-        products = Product.objects.all().order_by('-created_at')[:60]
+        products = Product.objects.order_by('-created_at')[:60]
         serializer = ProductViewSerializer(products, many=True)
         if not serializer:
             return response(
@@ -79,7 +121,7 @@ class ProductViewSet(ViewSet):
                 status=500,
                 message="there is a problem token"
             )
-        user = User.objects.filter(id=check_token['id']).first()
+        user = User.objects.filter(id=check_token['user_id']).first()
         if not user:
             return response(
                 data=None,
@@ -103,7 +145,7 @@ class ProductViewSet(ViewSet):
         )
         
     """ ADD FAVORITS """
-    @action(methods=['post'], detail=False, url_path=r'addfavorits', url_name='addfavorits')
+    @action(methods=['get'], detail=False, url_path=r'addfavorits', url_name='addfavorits')
     def addFavorits(self, request):
         try:
             token = request.META.get('HTTP_AUTHORIZATION')
@@ -120,30 +162,44 @@ class ProductViewSet(ViewSet):
                 status=500,
                 message="there is a problem token"
             )
-        data = convertParam(request)
-        if not {'favorits'}.issubset(data):
-            return response(
-                data=None,
-                status=400,
-                message="favorits not sent!"
-            )
-        
-        user = User.objects.filter(id=check_token['id']).first()
+        user = User.objects.filter(id=check_token['user_id']).first()
         if not user:
             return response(
                 data=None,
                 status=404,
                 message="user not found"
             )
-        serializer = FavoritsSerailizer(user, data)
-        if not serializer:
+            
+        data = convertParam(request)
+        if 'product_id' not in data:
             return response(
-                data=serializer.errors,
+                data=None,
                 status=400,
-                message="invalid fields sent"
+                message="favorits not sent!"
             )
+        if not data['product_id'].isnumeric():
+            return response(
+                data=None,
+                status=400,
+                message="tou send an invalid str must and number id"
+            )
+        product_id = int(data['product_id'])
+        product = Product.objects.filter(id=product_id).first()
+        if not product:
+            return response(
+                data=None,
+                status=404,
+                message="product was not found"
+            )
+
+        user.favorits.add(product)
+        user.save()
+        
         return response(
-                data=serializer.data,
+                data={
+                    "added_product": product_id,
+                    "added_by_user": check_token['user_id']
+                    },
                 status=200,
                 message="add to favorits"
             )
@@ -166,30 +222,43 @@ class ProductViewSet(ViewSet):
                 status=500,
                 message="there is a problem token"
             )
-        data = convertParam(request)
-        if not {'favorits'}.issubset(data):
-            return response(
-                data=None,
-                status=400,
-                message="favorits not sent!"
-            )
-        
-        user = User.objects.filter(id=check_token['id']).first()
+        user = User.objects.filter(id=check_token['user_id']).first()
         if not user:
             return response(
                 data=None,
                 status=404,
                 message="user not found"
             )
-        serializer = FavoritsSerailizer(user, data)
-        if not serializer:
+        data = convertParam(request)
+        if 'product_id' not in data:
             return response(
-                data=serializer.errors,
+                data=None,
                 status=400,
-                message="invalid fields sent"
+                message="favorits not sent!"
             )
+        if not data['product_id'].isnumeric():
+            return response(
+                data=None,
+                status=400,
+                message="tou send an invalid str must and number id"
+            )
+        product_id = int(data['product_id'])
+        product = Product.objects.filter(id=product_id).first()
+        if not product:
+            return response(
+                data=None,
+                status=404,
+                message="product was not found"
+            )
+
+        user.favorits.remove(product)
+        user.save()
+        
         return response(
-                data=serializer.data,
+                data={
+                    "deleted_product": product_id,
+                    "deleted_by_user": check_token['user_id']
+                    },
                 status=200,
                 message="remove from favorits"
             )
@@ -212,7 +281,7 @@ class ProductViewSet(ViewSet):
                 status=500,
                 message="there is a problem token"
             )
-        user = User.objects.filter(id=check_token['id']).first()
+        user = User.objects.filter(id=check_token['user_id']).first()
         if not user:
             return response(
                 data=None,
@@ -278,7 +347,7 @@ class ProductViewSet(ViewSet):
                 status=500,
                 message="there is a problem token"
             )
-        user = User.objects.filter(id=check_token['id']).first()
+        user = User.objects.filter(id=check_token['user_id']).first()
         if not user:
             return response(
                 data=None,
@@ -330,7 +399,7 @@ class ProductViewSet(ViewSet):
                 status=500,
                 message="there is a problem token"
             )
-        user = User.objects.filter(id=check_token['id']).first()
+        user = User.objects.filter(id=check_token['user_id']).first()
         if not user:
             return response(
                 data=None,
@@ -375,7 +444,7 @@ class ProductViewSet(ViewSet):
                 status=500,
                 message="there is a problem token"
             )
-        user = User.objects.filter(id=check_token['id']).first()
+        user = User.objects.filter(id=check_token['user_id']).first()
         if not user:
             return response(
                 data=None,

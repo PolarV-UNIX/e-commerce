@@ -2,6 +2,34 @@ from ..models import Category, Product
 from rest_framework import serializers
 from User.models import User
 
+
+
+
+""" ADD PRODUCT SERIALIZER """
+class AddSimpleProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['id','title', 'price']
+        
+    def create(self, validated_data):
+        print("$$$$$$$$$$$$$$$$$$$$$$$$$$", validated_data)
+        if {'title', 'price'}.issubset(validated_data): 
+            if validated_data['title'] is None and validated_data['price'] is None:
+                raise serializers.ValidationError(
+                    "can't send empety value"
+                ) 
+            product = Product.objects.create(
+                title=validated_data['title'],
+                price=validated_data['price']
+            )
+            return product
+        else:
+            raise serializers.ValidationError(
+                "send the fields title and price"
+            )
+
+
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -15,16 +43,15 @@ class DiscountSerializer(serializers.ModelSerializer):
 
 
 class ProductViewSerializer(serializers.ModelSerializer):
-    discount = DiscountSerializer(many=True)
     class Meta:
         model = Product
-        fields = ('id', 'title', 'rating', 'price', 'image', 'rating', 'discount')
+        fields = ('id', 'title', 'rate_id', 'price', 'image_id', 'discount')
 
 
 class DetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ('id', 'title', 'discount', 'rating', 'reviews', 'price', 'discription', 'image')
+        fields = ('id', 'title', 'discount', 'rate_id', 'price', 'discription', 'image_id')
 
 
 class SearchSerializer(serializers.ModelSerializer):
@@ -34,12 +61,14 @@ class SearchSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'image', 'rating', 'price', 'short_discription', 'rating')
         
 
+""" FAVORITS SERIAZLIER """
 class FavoritsSerailizer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['favorits']
         
     def update(self, instance, validated_data):
+        print("$$$$$$$$$$$$$$$$$$$$$$", validated_data)
         instance.favorits = validated_data['favorits']
         instance.save()
         return instance
@@ -48,4 +77,4 @@ class FavoritsSerailizer(serializers.ModelSerializer):
 class ProductForUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = '__all__'
+        fields = ['title', 'price', 'rate_id']

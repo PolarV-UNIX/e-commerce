@@ -8,7 +8,7 @@ import jwt
 
 
 
-def genrateJWTToken(user_id, user_phone, code):
+def genrateJWTToken(user_id, user_phone, code=None):
     payload = {
         'user_id': user_id,
         'phone': user_phone,
@@ -16,21 +16,23 @@ def genrateJWTToken(user_id, user_phone, code):
     }
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
     # Convert bytes to string for JSON response
-    return token.decode('utf-8')
+    return token
 
-def checkToken(token, user):
+def checkToken(token):
     try:
         token = token.split(" ")[1]
         decoded_data = jwt.decode(
-            jwt=token,
+            token,
             key=SECRET_KEY,
-            algorithms=['HS256']
+            algorithms=["HS256"]
         )
         user = User.objects.filter(id=decoded_data['user_id']).first()
-        if decoded_data['exp'] > timezone.now():
-            genrateJWTToken(user)
-        else:
-            return decoded_data
+        if not user:
+            return False
+        # Diffrene between times by seconds 
+        if decoded_data['exp'] > timezone.now().timestamp():
+            genrateJWTToken(user.id, user.phone)
+        return decoded_data
     except:
         return False
     

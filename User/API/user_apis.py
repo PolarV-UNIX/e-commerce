@@ -14,7 +14,8 @@ from User.serializers.user_serializers import (
     UserDeviceIPSerializer,
     UserChanePhonenumberSerializer,
     UserChangeAvatarSerializer,
-    UserChangeNameSerializer
+    UserChangeNameSerializer,
+    UserUpdateDeviceSerializer
 )
 from User.jwt import checkToken, genrateJWTToken
 
@@ -28,6 +29,7 @@ class UserViewSet(ViewSet):
     @method_decorator(csrf_exempt, name='dispatch')
     @action(methods=['post'], detail=False, url_path=r'register', url_name='register')
     def register(self, request):
+        data = request.data
         try:
             token = request.META.get('HTTP_AUTHORIZATION')
         except:
@@ -38,34 +40,44 @@ class UserViewSet(ViewSet):
             )
         if token is None:
             try:
-                phone = request.data['phone']
+                phone = data['phone']
             except:
                 return response(
                     data=None,
                     status=401,
                     message="bad request there is no phone number or token"
                 )
-            # Store user 
-            serializer = UserRegisterSerializer(data=request.data)
+            ip = getClientIP(request)
+            context = {
+                'ip_address': ip
+            }
+            # Store user
+            serializer = UserRegisterSerializer(data=data, context=context)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             
-            # Store ip address of device
-            serializer_device_ip = UserDeviceIPSerializer(data=getClientIP)
-            serializer_device_ip.is_valid(raise_exception=True)
-            serializer_device_ip.save()
-            
+            # somethings 
+            user = User.objects.filter(id=serializer.data['id']).first()
+            user_device = UserDevice.objects.order_by('-created_at').filter(ip_address=ip).first()
+            serializer_device = UserUpdateDeviceSerializer(user, data={
+                'device_user': user_device.id
+            })
+            serializer_device.is_valid(raise_exception=True)
+            serializer_device.save()
+
             # Create token for user 
             generate_token = genrateJWTToken(
                 user_id=serializer.data['id'],
-                phone=serializer.data['phone'],
-                code=serializer.data['code']
+                user_phone=serializer.data['phone'],
+                code=serializer.data['verification_code']
             )
             
             # Add token to data response
-            serializer.data['token'] = generate_token
             return response(
-                data=serializer.data,
+                data={
+                    "user_data": serializer.data,
+                    "token": generate_token
+                    },
                 status=201,
                 message="user create succefuly"
             )
@@ -109,16 +121,6 @@ class UserViewSet(ViewSet):
                 message="the phone number has non-numeric characters"
             )
         check_token = checkToken(token)
-        user_phone = User.objects.filter(id=check_token['id']).first()
-        if user_phone.phone == phone:
-            return response(
-                data=None,
-                status=400,
-                message="this phone is exist for changing the phone number you need a new one"
-            )
-        serializer = UserChanePhonenumberSerializer(user_phone, data=phone)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
         if check_token is False:
             return response(
                 data=None,
@@ -126,10 +128,30 @@ class UserViewSet(ViewSet):
                 message="there is a problem with create token"
             )
         
+        user_phone = User.objects.filter(id=check_token['user_id']).first()
+        if not user_phone:
+            return response(
+                data=None,
+                status=404,
+                message="user not found"
+            )
+            
+        if user_phone.phone == phone:
+            return response(
+                data=None,
+                status=400,
+                message="this phone is exist for changing the phone number you need add a new one"
+            )
+        serializer = UserChanePhonenumberSerializer(user_phone, data=phone)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
         fresh_token = check_token
-        serializer.data['fresh_token'] = fresh_token
         return response(
-            data=serializer.data,
+            data={
+                "main_data":serializer.data,
+                "fresh_token": fresh_token
+            },
             status=200,
             message="phone changed successfuly"
         )
@@ -146,7 +168,14 @@ class UserViewSet(ViewSet):
                 message="there is no token add in header pf request"
             )
         check_token = checkToken(token)
-        user = User.objects.filter(id=check_token['id']).first()
+        if check_token is False:
+            return response(
+                data=None,
+                status=500,
+                message="there is a problem with create token"
+            )
+            
+        user = User.objects.filter(id=check_token['user_id']).first()
         if not user:
             return response(
                 data=None,
@@ -154,8 +183,7 @@ class UserViewSet(ViewSet):
                 message="user not found"
             )
     
-        url_path_photo = request.data['avatar']
-        serializer = UserChangeAvatarSerializer(user ,data=url_path_photo)
+        serializer = UserChangeAvatarSerializer(user ,data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return response(
@@ -177,7 +205,7 @@ class UserViewSet(ViewSet):
                 message="there is no token add in header pf request"
             )
         check_token = checkToken(token)
-        user = User.objects.filter(id=check_token['id']).first()
+        user = User.objects.filter(id=check_token['user_id']).first()
         data = request.data
         serializer = UserChangeNameSerializer(user, data=data)
         serializer.is_valid(raise_exception=True)
@@ -210,7 +238,13 @@ class UserViewSet(ViewSet):
                 message="there is no token add in header pf request"
             )
         check_token = checkToken(token)
-        user = User.objects.filter(id=check_token['id']).first()
+        if check_token is False:
+            return response(
+                data=None,
+                status=500,
+                message="there is a problem with create token"
+            )
+        user = User.objects.filter(id=check_token['user_id']).first()
         if user:
             user.delete()
             return response(

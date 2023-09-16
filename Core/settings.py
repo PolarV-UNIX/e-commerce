@@ -40,9 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     #pacakges
-    'djangoratings',
-    'django_ckeditor_5',
-    
     #DRF
     'rest_framework',
     
@@ -53,20 +50,20 @@ INSTALLED_APPS = [
 ]
 
 # DRF JWT TOKEN CONFIG
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        # OTHER AUTH CLASS IF NEEDED
-    )
-}
-# ACCESS TOKEN EXPIRE
-from datetime import timedelta
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'rest_framework_simplejwt.authentication.JWTAuthentication',
+#         # OTHER AUTH CLASS IF NEEDED
+#     )
+# }
+# # ACCESS TOKEN EXPIRE
+# from datetime import timedelta
 
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=60),  # Set the access token lifetime to 60 days
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=60),  # Optional: Set the refresh token lifetime to 60 days
-    'SLIDING_TOKEN_LIFETIME': timedelta(days=120),  # Optional: Set the sliding token lifetime to 120 days
-}
+# SIMPLE_JWT = {
+#     'ACCESS_TOKEN_LIFETIME': timedelta(days=60),  # Set the access token lifetime to 60 days
+#     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=60),  # Optional: Set the refresh token lifetime to 60 days
+#     'SLIDING_TOKEN_LIFETIME': timedelta(days=120),  # Optional: Set the sliding token lifetime to 120 days
+# }
 
 
 MIDDLEWARE = [
@@ -168,7 +165,6 @@ GET_USER_URL = ''
 # DEFINE AUTH BACKEND
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'Core.auth_backend.MyBackend',
 )
 
 # Static files (CSS, JavaScript, Images)
@@ -179,95 +175,95 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
-CUSTOM_COLOR_PALETTE = [
-        {
-            'color': 'hsl(4, 90%, 58%)',
-            'label': 'Red'
-        },
-        {
-            'color': 'hsl(340, 82%, 52%)',
-            'label': 'Pink'
-        },
-        {
-            'color': 'hsl(291, 64%, 42%)',
-            'label': 'Purple'
-        },
-        {
-            'color': 'hsl(262, 52%, 47%)',
-            'label': 'Deep Purple'
-        },
-        {
-            'color': 'hsl(231, 48%, 48%)',
-            'label': 'Indigo'
-        },
-        {
-            'color': 'hsl(207, 90%, 54%)',
-            'label': 'Blue'
-        },
-    ]
+# CUSTOM_COLOR_PALETTE = [
+#         {
+#             'color': 'hsl(4, 90%, 58%)',
+#             'label': 'Red'
+#         },
+#         {
+#             'color': 'hsl(340, 82%, 52%)',
+#             'label': 'Pink'
+#         },
+#         {
+#             'color': 'hsl(291, 64%, 42%)',
+#             'label': 'Purple'
+#         },
+#         {
+#             'color': 'hsl(262, 52%, 47%)',
+#             'label': 'Deep Purple'
+#         },
+#         {
+#             'color': 'hsl(231, 48%, 48%)',
+#             'label': 'Indigo'
+#         },
+#         {
+#             'color': 'hsl(207, 90%, 54%)',
+#             'label': 'Blue'
+#         },
+#     ]
 
-CKEDITOR_5_CUSTOM_CSS = 'path_to.css' # optional
-CKEDITOR_5_FILE_STORAGE = "path_to_storage.CustomStorage" # optional
-CKEDITOR_5_CONFIGS = {
-    'default': {
-        'toolbar': ['heading', '|', 'bold', 'italic', 'link',
-                    'bulletedList', 'numberedList', 'blockQuote', 'imageUpload', ],
+# CKEDITOR_5_CUSTOM_CSS = 'path_to.css' # optional
+# CKEDITOR_5_FILE_STORAGE = "path_to_storage.CustomStorage" # optional
+# CKEDITOR_5_CONFIGS = {
+#     'default': {
+#         'toolbar': ['heading', '|', 'bold', 'italic', 'link',
+#                     'bulletedList', 'numberedList', 'blockQuote', 'imageUpload', ],
 
-    },
-    'extends': {
-        'blockToolbar': [
-            'paragraph', 'heading1', 'heading2', 'heading3',
-            '|',
-            'bulletedList', 'numberedList',
-            '|',
-            'blockQuote',
-        ],
-        'toolbar': ['heading', '|', 'outdent', 'indent', '|', 'bold', 'italic', 'link', 'underline', 'strikethrough',
-        'code','subscript', 'superscript', 'highlight', '|', 'codeBlock', 'sourceEditing', 'insertImage',
-                    'bulletedList', 'numberedList', 'todoList', '|',  'blockQuote', 'imageUpload', '|',
-                    'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'mediaEmbed', 'removeFormat',
-                    'insertTable',],
-        'image': {
-            'toolbar': ['imageTextAlternative', '|', 'imageStyle:alignLeft',
-                        'imageStyle:alignRight', 'imageStyle:alignCenter', 'imageStyle:side',  '|'],
-            'styles': [
-                'full',
-                'side',
-                'alignLeft',
-                'alignRight',
-                'alignCenter',
-            ]
+#     },
+#     'extends': {
+#         'blockToolbar': [
+#             'paragraph', 'heading1', 'heading2', 'heading3',
+#             '|',
+#             'bulletedList', 'numberedList',
+#             '|',
+#             'blockQuote',
+#         ],
+#         'toolbar': ['heading', '|', 'outdent', 'indent', '|', 'bold', 'italic', 'link', 'underline', 'strikethrough',
+#         'code','subscript', 'superscript', 'highlight', '|', 'codeBlock', 'sourceEditing', 'insertImage',
+#                     'bulletedList', 'numberedList', 'todoList', '|',  'blockQuote', 'imageUpload', '|',
+#                     'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'mediaEmbed', 'removeFormat',
+#                     'insertTable',],
+#         'image': {
+#             'toolbar': ['imageTextAlternative', '|', 'imageStyle:alignLeft',
+#                         'imageStyle:alignRight', 'imageStyle:alignCenter', 'imageStyle:side',  '|'],
+#             'styles': [
+#                 'full',
+#                 'side',
+#                 'alignLeft',
+#                 'alignRight',
+#                 'alignCenter',
+#             ]
 
-        },
-        'table': {
-            'contentToolbar': [ 'tableColumn', 'tableRow', 'mergeTableCells',
-            'tableProperties', 'tableCellProperties' ],
-            'tableProperties': {
-                'borderColors': CUSTOM_COLOR_PALETTE,
-                'backgroundColors': CUSTOM_COLOR_PALETTE
-            },
-            'tableCellProperties': {
-                'borderColors': CUSTOM_COLOR_PALETTE,
-                'backgroundColors': CUSTOM_COLOR_PALETTE
-            }
-        },
-        'heading' : {
-            'options': [
-                { 'model': 'paragraph', 'title': 'Paragraph', 'class': 'ck-heading_paragraph' },
-                { 'model': 'heading1', 'view': 'h1', 'title': 'Heading 1', 'class': 'ck-heading_heading1' },
-                { 'model': 'heading2', 'view': 'h2', 'title': 'Heading 2', 'class': 'ck-heading_heading2' },
-                { 'model': 'heading3', 'view': 'h3', 'title': 'Heading 3', 'class': 'ck-heading_heading3' }
-            ]
-        }
-    },
-    'list': {
-        'properties': {
-            'styles': 'true',
-            'startIndex': 'true',
-            'reversed': 'true',
-        }
-    }
-}
+#         },
+#         'table': {
+#             'contentToolbar': [ 'tableColumn', 'tableRow', 'mergeTableCells',
+#             'tableProperties', 'tableCellProperties' ],
+#             'tableProperties': {
+#                 'borderColors': CUSTOM_COLOR_PALETTE,
+#                 'backgroundColors': CUSTOM_COLOR_PALETTE
+#             },
+#             'tableCellProperties': {
+#                 'borderColors': CUSTOM_COLOR_PALETTE,
+#                 'backgroundColors': CUSTOM_COLOR_PALETTE
+#             }
+#         },
+#         'heading' : {
+#             'options': [
+#                 { 'model': 'paragraph', 'title': 'Paragraph', 'class': 'ck-heading_paragraph' },
+#                 { 'model': 'heading1', 'view': 'h1', 'title': 'Heading 1', 'class': 'ck-heading_heading1' },
+#                 { 'model': 'heading2', 'view': 'h2', 'title': 'Heading 2', 'class': 'ck-heading_heading2' },
+#                 { 'model': 'heading3', 'view': 'h3', 'title': 'Heading 3', 'class': 'ck-heading_heading3' }
+#             ]
+#         }
+#     },
+#     'list': {
+#         'properties': {
+#             'styles': 'true',
+#             'startIndex': 'true',
+#             'reversed': 'true',
+#         }
+#     }
+# }
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
