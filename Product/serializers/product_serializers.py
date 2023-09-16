@@ -1,4 +1,4 @@
-from ..models import Category, Product
+from ..models import Category, Product, Rating
 from rest_framework import serializers
 from User.models import User
 
@@ -78,3 +78,33 @@ class ProductForUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['title', 'price', 'rate_id']
+        
+
+""" VOTE SERIAIZER """
+class VoteUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rating
+        fields = ['user_id', 'rate', 'product_id']
+        
+    def create(self, validated_data):
+        rate_object = Rating.objects.create(
+            user_id=validated_data['user_id'],
+            rate=validated_data['rate'],
+            product_id=validated_data['product_id']
+        )
+        return rate_object
+    
+    def update(self, instance, validated_data):
+        instance.rate = validated_data['rate']
+        instance.save()
+        return instance
+    
+class VoteUpdateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rating
+        fields = ['rate', 'product_id']
+        
+    def update(self, instance, validated_data):
+        instance.rate = validated_data['rate']
+        instance.save()
+        return instance
